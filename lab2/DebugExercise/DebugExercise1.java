@@ -6,8 +6,11 @@ package DebugExercise;
  */
 public class DebugExercise1 {
     public static int divideThenRound(int top, int bottom) {
-        int quotient = top / bottom;
-        int result = Math.round(quotient);
+        double top1=top;
+        double bottom1=bottom;
+        double res=top1/bottom1;
+
+        int result = (int) Math.round(res);
         return result;
     }
 
