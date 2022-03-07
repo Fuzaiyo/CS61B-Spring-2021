@@ -149,7 +149,8 @@ public class Model extends Observable {
         //2.当键盘按下"up"时，实际上是对每一列进行操作，因此可以抽象出一个辅助方法专门处理一列上的情况
         for (int col = 0; col < board.size(); col++) {
             //当辅助函数确实进行了棋盘的改动，返回一个bool值来设置changed变量
-            if (mergeAtOneclu(col))
+            //if (mergeAtOneCol_1(col))   //我的第1版本
+            if (mergeAtOneCol_2(col))        //第2版本
                 changed = true;
         }
 
@@ -170,7 +171,7 @@ public class Model extends Observable {
      * @param col
      * @return
      */
-    public boolean mergeAtOneclu(int col) {
+    public boolean mergeAtOneCol_1(int col) {
         boolean ifchange = false;
 
         //1.对于一个格子，检查它是不是空棋子，是的话————它后面的非空棋子就要往前移动 这样做的目的是为了让非空棋子紧凑到一起以方便Merge
@@ -210,6 +211,39 @@ public class Model extends Observable {
             }
         }
         return false;
+    }
+
+
+    public boolean mergeAtOneCol_2(int col) {
+        boolean ifchange = false;
+
+        //1.设置一个boolen辅助数组标记被合并过的棋子，这样下一次循环遇到符合合并条件的也跳过，不合并
+        boolean[] ifcanMerge = new boolean[board.size()];
+
+        //2.开始循环，第一轮循环是对于每个非空棋子来说，开始第二轮循环——从头到它自己，找到一个可以合并或者移动的格子，进行移动或者合并操作。
+        for (int row = board.size() - 2; row >= 0; row--) { //直接从第二个棋子开始
+            Tile tile = board.tile(col, row);
+
+            if (tile == null)
+                continue;
+
+            for (int cr = board.size() - 1; cr > row; cr--) {
+                Tile target = board.tile(col, cr);
+                //合并条件:1.被贴位置不是空 2.那个位置没被贴过 3.两个棋子同分
+                if (target != null && !ifcanMerge[cr] && tile.value() == target.value()) {
+                    board.move(col, cr, tile);
+                    score += tile.value()*2;
+                    ifcanMerge[cr] = true;
+                    ifchange = true;
+                    break;
+                } else if (target == null) {   //如果前面遇到空棋子，贴过去
+                    board.move(col, cr, tile);
+                    ifchange = true;
+                    break;
+                }
+            }
+        }
+        return ifchange;
     }
 
 
