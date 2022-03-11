@@ -1,5 +1,7 @@
 package deque;
 
+import java.util.Iterator;
+
 public class ArrayDeque<T> {
     private int size;
     private int firstItemNextIndex;
@@ -9,10 +11,10 @@ public class ArrayDeque<T> {
     //不变量: first和last相同说明数组只剩一个空位了。size==arr.lenth说明满了,此时有可能last>first(此时first和last都在中间)，有可能也是last<first(此时first在最后一个索引.last在第一个索引)
 
     public ArrayDeque() {
-        arr = (T[]) new Object[20];
+        arr = (T[]) new Object[8];
         size = 0;
-        firstItemNextIndex = 3;
-        lastItemNextIndex = 4;
+        firstItemNextIndex = 0;
+        lastItemNextIndex = 1;
     }
 
     //深拷贝
@@ -29,11 +31,11 @@ public class ArrayDeque<T> {
     private void resize(int capacity) {
         T[] tmp = arr;
         arr = (T[]) new Object[capacity];
-        size=0;
+        size = 0;
 
         int oldfirst = firstItemNextIndex;
         int oldlast = lastItemNextIndex;
-        firstItemNextIndex = capacity / 2 ;
+        firstItemNextIndex = capacity / 2;
         lastItemNextIndex = firstItemNextIndex + 1;
 
         //拿到旧数组中的每个元素
@@ -114,8 +116,8 @@ public class ArrayDeque<T> {
     }
 
     private void ifShrink() {
-        if (arr.length> 16 && (double) size / (double) arr.length < 0.25)
-            resize(arr.length/ 2);
+        if (arr.length > 16 && (double) size / (double) arr.length < 0.25)
+            resize(arr.length / 2);
     }
 
     //如果 deque 为空，则返回 true，否则返回 false
@@ -156,7 +158,7 @@ public class ArrayDeque<T> {
         }
     }
 
-    private void printDeque() {
+    public void printDeque() {
         int index = (firstItemNextIndex + 1) % arr.length;  //index为第一个元素的下标
         int check = index;
         int end = lastItemNextIndex;
@@ -188,4 +190,13 @@ public class ArrayDeque<T> {
                 return arr[firstItemNextIndex + 1 + index - arr.length];
         }
     }
+
+    //    public Iterator<T> iterator(){
+//        return
+//    }
+
+//    public boolean equals(Object o) {
+//
+//    }
+
 }

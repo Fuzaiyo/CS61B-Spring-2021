@@ -1,5 +1,7 @@
 package deque;
 
+import java.util.Iterator;
+
 public class LinkedListDeque<T> {
 
     //内部类,表示单个结点
@@ -26,7 +28,9 @@ public class LinkedListDeque<T> {
 
     //空构造,构造一个循环哨兵链表
     public LinkedListDeque() {
+        //这个构造函数专门用来构造哨兵结点的,它创建之后才有地址，在构造函数里面无法设置自己指向自己，因为地址还没出来
         sentinel = new StuffNode(null);
+        //在对sentinel实例化完成后再对它的next和prev字段赋值。
         sentinel.prev = sentinel;
         sentinel.next = sentinel;
         size = 0;
@@ -35,10 +39,10 @@ public class LinkedListDeque<T> {
     //深拷贝
     public LinkedListDeque(LinkedListDeque other) {
         this();
-        StuffNode p=other.sentinel.next;
-        while (p!=other.sentinel){
+        StuffNode p = other.sentinel.next;
+        while (p != other.sentinel) {
             addLast(p.item);
-            p=p.next;
+            p = p.next;
             size++;
         }
     }
@@ -91,7 +95,7 @@ public class LinkedListDeque<T> {
 
     //如果 deque 为空，则返回 true，否则返回 false
     public boolean isEmpty() {
-        if (sentinel.prev == sentinel&&sentinel.next==sentinel)
+        if (sentinel.prev == sentinel && sentinel.next == sentinel)
             return true;
         else
             return false;
@@ -113,15 +117,13 @@ public class LinkedListDeque<T> {
 
     //获取给定索引处的结点(0是第一个) 如果不存在这样的结点，则返回 null。不能改变双端队列
     public T get(int index) {
-        int cnt = 0;
-        StuffNode p = sentinel.next;
-        while (p != sentinel) {
-            if (cnt == index)
-                return p.item;
-            cnt++;
-            p = p.next;
+        if (index >= size)
+            return null;
+        StuffNode pos = sentinel.next;
+        for (int i = 0; i < index; i++) {
+            pos = pos.next;
         }
-        return null;
+        return pos.item;
     }
 
     public T getRecursive(int index) {
@@ -138,7 +140,12 @@ public class LinkedListDeque<T> {
             return null;
     }
 
-//    public boolean equals(Object o){
+//        public Iterator<T> iterator(){
+//        return
+//    }
+//
+//    public boolean equals(Object o) {
 //
 //    }
+
 }
