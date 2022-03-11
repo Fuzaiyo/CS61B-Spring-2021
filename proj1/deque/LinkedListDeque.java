@@ -3,7 +3,7 @@ package deque;
 public class LinkedListDeque<T> {
 
     //内部类,表示单个结点
-    public class StuffNode {
+    private class StuffNode {
         StuffNode prev;
         T item;
         StuffNode next;
@@ -129,7 +129,7 @@ public class LinkedListDeque<T> {
         return realGetRecursive(index, p);
     }
 
-    public T realGetRecursive(int index, StuffNode p) {
+    private T realGetRecursive(int index, StuffNode p) {
         if (p != sentinel && index == 0) {
             return p.item;
         } else if (p != sentinel && index > 0)

@@ -4,12 +4,12 @@ public class ArrayDeque<T> {
     private int size;
     private int firstItemNextIndex;
     private int lastItemNextIndex;
-    private T arr[];
+    private T[] arr;
 
     //不变量: first和last相同说明数组只剩一个空位了。size==arr.lenth说明满了,此时有可能last>first(此时first和last都在中间)，有可能也是last<first(此时first在最后一个索引.last在第一个索引)
 
     public ArrayDeque() {
-        arr = (T[]) new Object[8];
+        arr = (T[]) new Object[20];
         size = 0;
         firstItemNextIndex = 3;
         lastItemNextIndex = 4;
@@ -17,9 +17,9 @@ public class ArrayDeque<T> {
 
     //深拷贝
     public ArrayDeque(ArrayDeque other) {
-        arr = (T[]) new Object[other.size];
+        arr = (T[]) new Object[other.arr.length];
         size = other.size;
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < other.arr.length; i++) {
             arr[i] = (T) other.arr[i];
         }
         firstItemNextIndex = other.firstItemNextIndex;
@@ -27,10 +27,33 @@ public class ArrayDeque<T> {
     }
 
     private void resize(int capacity) {
-        //重新计算大小之后,first和last索引位置可能会改变，写一个新的函数去计算first和last的正确位置
-//        firstItemNextIndex = calcuIndex();
-//        lastItemNextIndex = calcuIndex();
+        T[] tmp = arr;
+        arr = (T[]) new Object[capacity];
+        size=0;
 
+        int oldfirst = firstItemNextIndex;
+        int oldlast = lastItemNextIndex;
+        firstItemNextIndex = capacity / 2 ;
+        lastItemNextIndex = firstItemNextIndex + 1;
+
+        //拿到旧数组中的每个元素
+        int index = (oldfirst + 1) % tmp.length;  //index为第一个元素的下标
+        int check = index;
+        int end = oldlast;
+        if (oldlast == 0) {
+            end = tmp.length;
+        }
+        //真的很累 想不到怎么总结这段代码，数组是满的时候，index和end是相等的,只能用do while先做一次
+        do {
+            if (tmp[index] != null)
+                addLast(tmp[index]);
+            index++;
+            index = index % tmp.length;
+            if (index == check) //保证一次性的时序输出，当头再次遇到头时就结束。
+                break;
+        } while (index != end);
+
+        tmp = null;
     }
 
     private int calcuIndex() {
@@ -66,6 +89,7 @@ public class ArrayDeque<T> {
         firstItemNextIndex++;
         T item = arr[firstItemNextIndex];
         arr[firstItemNextIndex] = null;
+        size--;
         return item;
     }
 
@@ -80,6 +104,7 @@ public class ArrayDeque<T> {
         lastItemNextIndex--;
         T item = arr[lastItemNextIndex];
         arr[lastItemNextIndex] = null;
+        size--;
         return item;
     }
 
@@ -89,8 +114,8 @@ public class ArrayDeque<T> {
     }
 
     private void ifShrink() {
-        if (size > 16 && (double) size / (double) arr.length < 0.25)
-            resize(size / 2);
+        if (arr.length> 16 && (double) size / (double) arr.length < 0.25)
+            resize(arr.length/ 2);
     }
 
     //如果 deque 为空，则返回 true，否则返回 false
@@ -106,7 +131,7 @@ public class ArrayDeque<T> {
     }
 
     //从头到尾打印双端队列中的结点，用空格分隔。打印完所有结点后，打印出一个新行
-    public void printDeque() {
+    private void printDeque1() {
         //打印我发现有六种情况,分别对应了六种不同的遍历方式。。。
         // 1.first>last且数组满了(first在数组尾,last为0，所以令first为0循环一遍数组)
         // 2.first<last且数组满了(first在数组头下标0的位置，last在数组头+1)
@@ -131,7 +156,7 @@ public class ArrayDeque<T> {
         }
     }
 
-    public void printDeque2() {
+    private void printDeque() {
         int index = (firstItemNextIndex + 1) % arr.length;  //index为第一个元素的下标
         int check = index;
         int end = lastItemNextIndex;
