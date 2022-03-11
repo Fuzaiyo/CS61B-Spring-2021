@@ -179,7 +179,7 @@ public class ArrayDeque<T> {
 
     //获取给定索引处的结点(0是第一个) 如果不存在这样的结点，则返回 null。不能改变双端队列
     public T get(int index) {
-        if (index > size - 1)
+        if (index > size - 1||index<0)
             return null;
         if (size != arr.length && firstItemNextIndex < lastItemNextIndex)
             return arr[firstItemNextIndex + index + 1];
