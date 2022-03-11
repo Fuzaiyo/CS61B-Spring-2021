@@ -117,7 +117,7 @@ public class LinkedListDeque<T> {
 
     //获取给定索引处的结点(0是第一个) 如果不存在这样的结点，则返回 null。不能改变双端队列
     public T get(int index) {
-        if (index >= size)
+        if (index >= size||index < 0)
             return null;
         StuffNode pos = sentinel.next;
         for (int i = 0; i < index; i++) {
