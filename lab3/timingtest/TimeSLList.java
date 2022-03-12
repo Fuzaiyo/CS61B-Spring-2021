@@ -40,7 +40,7 @@ public class TimeSLList {
          *  When N = 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000
          */
         for (int i = 0; i < N; i++) {
-            SLList.getLast();
+            SLList.addLast(0);
             if (i == Math.pow(2, powerCount) * 1000 - 1) {
 
                 // Fetch runtime (current time - stopwatch start time)
@@ -53,7 +53,7 @@ public class TimeSLList {
                 runtimes.addLast(timeInSeconds);
 
                 // Add tracing operation counts
-                opCounts.addLast(10000);
+                opCounts.addLast(i+1);
 
                 powerCount ++;
             }
