@@ -2,16 +2,24 @@ package deque;
 
 import java.util.Iterator;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private int size;
     private int firstItemNextIndex;
     private int lastItemNextIndex;
     private T[] arr;
 
     //不变量: first和last相同说明数组只剩一个空位了。size==arr.lenth说明满了,此时有可能last>first(此时first和last都在中间)，有可能也是last<first(此时first在最后一个索引.last在第一个索引)
+    //要用指针判断队列已满的条件是:  addOne(first)==last
 
     public ArrayDeque() {
         arr = (T[]) new Object[8];
+        size = 0;
+        firstItemNextIndex = 0;
+        lastItemNextIndex = 1;
+    }
+
+    public ArrayDeque(int capacity) {
+        arr = (T[]) new Object[capacity];
         size = 0;
         firstItemNextIndex = 0;
         lastItemNextIndex = 1;
@@ -29,54 +37,31 @@ public class ArrayDeque<T> {
     }
 
     private void resize(int capacity) {
-        T[] tmp = arr;
-        arr = (T[]) new Object[capacity];
-        size = 0;
-
-        int oldfirst = firstItemNextIndex;
-        int oldlast = lastItemNextIndex;
-        firstItemNextIndex = capacity / 2;
-        lastItemNextIndex = firstItemNextIndex + 1;
-
-        //拿到旧数组中的每个元素
-        int index = (oldfirst + 1) % tmp.length;  //index为第一个元素的下标
-        int check = index;
-        int end = oldlast;
-        if (oldlast == 0) {
-            end = tmp.length;
+        T[] tmp = (T[]) new Object[capacity];
+        //第一次做的时候，是想着从旧数组的第一个元素出发，依次拿到每个元素然后addLast到新数组的中间部分里，直到遇到最后一个元素，结束条件用first和last来判断的，很麻烦。
+        //其实只要先拷贝元素到新数组中，最后来指定first和last指针就行。
+        int oldindex = addOne(lastItemNextIndex);
+        for (int i = 0; i < size; i++) {
+            tmp[i] = arr[oldindex];
+            oldindex = addOne(oldindex);
         }
-        //真的很累 想不到怎么总结这段代码，数组是满的时候，index和end是相等的,只能用do while先做一次
-        do {
-            if (tmp[index] != null)
-                addLast(tmp[index]);
-            index++;
-            index = index % tmp.length;
-            if (index == check) //保证一次性的时序输出，当头再次遇到头时就结束。
-                break;
-        } while (index != end);
-
-        tmp = null;
+        this.arr = tmp;
+        firstItemNextIndex = arr.length - 1;
+        lastItemNextIndex = size;
     }
 
-    private int calcuIndex() {
-        return 0;
-    }
 
     public void addFirst(T item) {
         ifEnlarge();
         arr[firstItemNextIndex] = item;
-        firstItemNextIndex--;
-        if (firstItemNextIndex < 0)
-            firstItemNextIndex = arr.length - 1;
+        firstItemNextIndex = subOne(firstItemNextIndex);
         size++;
     }
 
     public void addLast(T item) {
         ifEnlarge();
         arr[lastItemNextIndex] = item;
-        lastItemNextIndex++;
-        if (lastItemNextIndex == arr.length)
-            lastItemNextIndex = 0;
+        lastItemNextIndex = addOne(lastItemNextIndex);
         size++;
     }
 
@@ -85,10 +70,7 @@ public class ArrayDeque<T> {
         if (size == 0)
             return null;
         ifShrink();
-        if (firstItemNextIndex == arr.length - 1) {
-            firstItemNextIndex = -1;
-        }
-        firstItemNextIndex++;
+        firstItemNextIndex = addOne(firstItemNextIndex);
         T item = arr[firstItemNextIndex];
         arr[firstItemNextIndex] = null;
         size--;
@@ -100,10 +82,7 @@ public class ArrayDeque<T> {
         if (size == 0)
             return null;
         ifShrink();
-        if (lastItemNextIndex == 0) {
-            lastItemNextIndex = arr.length;
-        }
-        lastItemNextIndex--;
+        lastItemNextIndex = subOne(lastItemNextIndex);
         T item = arr[lastItemNextIndex];
         arr[lastItemNextIndex] = null;
         size--;
@@ -120,13 +99,6 @@ public class ArrayDeque<T> {
             resize(arr.length / 2);
     }
 
-    //如果 deque 为空，则返回 true，否则返回 false
-    public boolean isEmpty() {
-        if (size == 0)
-            return true;
-        else
-            return false;
-    }
 
     public int size() {
         return size;
@@ -159,36 +131,41 @@ public class ArrayDeque<T> {
     }
 
     public void printDeque() {
-        int index = (firstItemNextIndex + 1) % arr.length;  //index为第一个元素的下标
-        int check = index;
-        int end = lastItemNextIndex;
-        if (lastItemNextIndex == 0) {
-            end = arr.length;
+        //能把六种情况合并
+        int i = addOne(firstItemNextIndex);
+        for (int j = 0; j < size; j++) {
+            System.out.print(arr[i] + " ");
+            i = addOne(i);
         }
-        //真的很累 想不到怎么总结这段代码，数组是满的时候，index和end是相等的,只能用do while先做一次
-        do {
-            if (arr[index] != null)
-                System.out.print(arr[index] + " ");
-            index++;
-            index = index % arr.length;
-            if (index == check) //保证一次性的时序输出，当头再次遇到头时就结束。
-                break;
-        } while (index != end);
         System.out.println();
     }
 
     //获取给定索引处的结点(0是第一个) 如果不存在这样的结点，则返回 null。不能改变双端队列
     public T get(int index) {
-        if (index > size - 1||index<0)
+        if (index > size - 1 || index < 0)
             return null;
-        if (size != arr.length && firstItemNextIndex < lastItemNextIndex)
-            return arr[firstItemNextIndex + index + 1];
-        else {
-            if (firstItemNextIndex + index < arr.length)  //想拿first到数组尾之间的元素
-                return arr[firstItemNextIndex + 1 + index];
-            else   //想拿到0到队列尾之间的元素
-                return arr[firstItemNextIndex + 1 + index - arr.length];
-        }
+
+//        if (size != arr.length && firstItemNextIndex < lastItemNextIndex)
+//            return arr[firstItemNextIndex + index + 1];
+//        else {
+//            if (firstItemNextIndex + index < arr.length)  //想拿first到数组尾之间的元素
+//                return arr[firstItemNextIndex + 1 + index];
+//            else   //想拿到0到队列尾之间的元素
+//                return arr[firstItemNextIndex + 1 + index - arr.length];
+//        }
+
+        //改进版:
+        //类似地，在get时，也可以使用这个思想,合并了以上三种情况。
+        int start = addOne(firstItemNextIndex);
+        return arr[(start + index) % arr.length];
+    }
+
+    private int addOne(int Index) {
+        return (Index + 1) % arr.length;
+    }
+
+    private int subOne(int Index) {
+        return (Index - 1 + arr.length) % arr.length;
     }
 
     //    public Iterator<T> iterator(){

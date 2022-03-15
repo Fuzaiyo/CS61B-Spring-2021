@@ -2,7 +2,7 @@ package deque;
 
 import java.util.Iterator;
 
-public class LinkedListDeque<T> {
+public class LinkedListDeque<T> implements Deque<T> {
 
     //内部类,表示单个结点
     private class StuffNode {
@@ -91,14 +91,6 @@ public class LinkedListDeque<T> {
         sentinel.prev = last.prev;
         sentinel.prev.next = sentinel;
         return last.item;
-    }
-
-    //如果 deque 为空，则返回 true，否则返回 false
-    public boolean isEmpty() {
-        if (sentinel.prev == sentinel && sentinel.next == sentinel)
-            return true;
-        else
-            return false;
     }
 
     public int size() {
