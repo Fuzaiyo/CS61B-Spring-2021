@@ -1,7 +1,5 @@
 package deque;
 
-import java.util.Iterator;
-
 public class LinkedListDeque<T> implements Deque<T> {
 
     //内部类,表示单个结点
@@ -131,13 +129,5 @@ public class LinkedListDeque<T> implements Deque<T> {
         else
             return null;
     }
-
-//        public Iterator<T> iterator(){
-//        return
-//    }
-//
-//    public boolean equals(Object o) {
-//
-//    }
 
 }

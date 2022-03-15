@@ -1,7 +1,5 @@
 package deque;
 
-import java.util.Iterator;
-
 public class ArrayDeque<T> implements Deque<T> {
     private int size;
     private int firstItemNextIndex;
@@ -168,12 +166,5 @@ public class ArrayDeque<T> implements Deque<T> {
         return (Index - 1 + arr.length) % arr.length;
     }
 
-    //    public Iterator<T> iterator(){
-//        return
-//    }
-
-//    public boolean equals(Object o) {
-//
-//    }
 
 }
