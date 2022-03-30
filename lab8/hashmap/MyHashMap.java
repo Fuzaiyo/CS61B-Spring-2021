@@ -2,6 +2,7 @@ package hashmap;
 
 import java.util.*;
 
+
 /**
  * A hash table-backed Map implementation. Provides amortized constant time
  * access to elements via get(), remove(), and put() in the best case.
@@ -17,7 +18,7 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
      * The protected qualifier allows subclass access
      */
     protected class Node {
-        HashMap hashMap=new HashMap();
+        HashMap hashMap = new HashMap();
         K key;
         V value;
 
@@ -41,11 +42,11 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
      * Constructors
      */
     public MyHashMap() {
-        this(INIT_CAPACITY,INIT_LOADFACTOR);
+        this(INIT_CAPACITY, INIT_LOADFACTOR);
     }
 
     public MyHashMap(int initialSize) {
-       this(initialSize,INIT_LOADFACTOR);
+        this(initialSize, INIT_LOADFACTOR);
     }
 
     /**
@@ -56,10 +57,10 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
      * @param maxLoad     maximum load factor
      */
     public MyHashMap(int initialSize, double maxLoad) {
-        this.loadFactor= maxLoad;
+        this.loadFactor = maxLoad;
         tableSize = initialSize;
-        itemSize=0;
-        buckets=createTable(initialSize);
+        itemSize = 0;
+        buckets = createTable(initialSize);
     }
 
     /**
@@ -89,7 +90,7 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
      */
     protected Collection<Node> createBucket() {
         //我选择用链表作为bucket
-        return  (LinkedList<Node>) new LinkedList();
+        return (LinkedList<Node>) new LinkedList();
     }
 
     /**
@@ -105,38 +106,38 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         //泛型数组向下强转
         buckets = (Collection<Node>[]) new Collection[tableSize];
         for (int i = 0; i < tableSize; i++) {
-            buckets[i]=createBucket();
+            buckets[i] = createBucket();
         }
         return buckets;
     }
 
-    private class KeysIterator<K> implements Iterator<K> {
-        @Override
-        public boolean hasNext() {
-            return false;
-        }
-
-        @Override
-        public K next() {
-            return null;
-        }
-    }
-
     @Override
     public void clear() {
-        tableSize=INIT_CAPACITY;
-        loadFactor=INIT_LOADFACTOR;
-        itemSize=0;
-        buckets=createTable(tableSize);
+        tableSize = INIT_CAPACITY;
+        loadFactor = INIT_LOADFACTOR;
+        itemSize = 0;
+        buckets = createTable(tableSize);
     }
 
     @Override
     public boolean containsKey(K key) {
-        return false;
+        if (key == null) throw new IllegalArgumentException("argument to contains() is null");
+        return get(key) != null;
     }
 
     @Override
     public V get(K key) {
+        if (key == null) throw new IllegalArgumentException("argument to contains() is null");
+        for (int i = 0; i < tableSize; i++) {
+            if (buckets[i].isEmpty())
+                continue;
+            else {
+                for (Node node : buckets[i]) {
+                    if (key.equals(node.key))
+                        return node.value;
+                }
+            }
+        }
         return null;
     }
 
@@ -147,20 +148,57 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public void put(K key, V value) {
+        if (key == null || value == null) {
+            throw new NullPointerException("argument to put() is null");
+        }
 
 
-
-
+        int i = hash(key);
+        //拿到了这个i位置，检查哈希冲突，得在这个位置的链表上扫描一遍，确定没有Key的值才插入，有存在的Key就把它的value更新
+        int falg = 0;
+        for (Node node : buckets[i]) {
+            if (key.equals(node.key)) {
+                node.value = value;
+                falg = 1;
+                break;
+            }
+        }
+        if (falg == 0) {
+            buckets[i].add(new Node(key, value));
+            itemSize++;
+            keySet.add(key);
+        }
 
         //插完再扩容，因为前面的put可能只是更新value值
-        if(itemSize/tableSize>=loadFactor)
-            resize(tableSize*2);
+        if ((double) itemSize / (double) tableSize > loadFactor)
+            resize(tableSize * 2);
+    }
 
+    //根据Key和buckets数组的大小返回在buckets数组中正确的一个位置
+    private int hash(K key) {
+        return (key.hashCode() & 0x7fffffff) % tableSize;
     }
 
     private void resize(int newcapacity) {
-        tableSize=newcapacity;
+        //临时的Set拿到原先所有的Node，然后把他们一一插入到新建好的二倍大小的hashmap中
+        HashSet<Node> hashSet = new HashSet<>();
 
+        for (int i = 0; i < tableSize; i++) {
+            if (buckets[i].isEmpty())  //优化
+                continue;
+            else {
+                for (Node node : buckets[i]) {
+                    hashSet.add(node);
+                }
+            }
+        }
+        this.tableSize = newcapacity;
+        this.itemSize = 0;
+        buckets = createTable(newcapacity);
+        //给新buckets数组加Node
+        for (Node node : hashSet) {
+            this.put(node.key, node.value);
+        }
     }
 
     @Override
@@ -171,17 +209,37 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     @Override
     public V remove(K key) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new NullPointerException("argument to remove() is null");
+        }
+        int i = hash(key);
+        for (Node node : buckets[i]) {
+            if (node.key.equals(key)) {
+                buckets[i].remove(node);
+                return node.value;
+            }
+        }
+        return null;
     }
 
     @Override
     public V remove(K key, V value) {
-        throw new UnsupportedOperationException();
+        if (key == null) {
+            throw new NullPointerException("argument to remove() is null");
+        }
+        int i = hash(key);
+        for (Node node : buckets[i]) {
+            if (node.key.equals(key) && node.value.equals(value)) {
+                buckets[i].remove(node);
+                return node.value;
+            }
+        }
+        return null;
     }
 
     @Override
     public Iterator<K> iterator() {
-        return new KeysIterator();
+        return keySet.iterator();
     }
 
 
