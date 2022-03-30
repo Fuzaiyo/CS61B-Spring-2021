@@ -18,7 +18,6 @@ public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
      * The protected qualifier allows subclass access
      */
     protected class Node {
-        HashMap hashMap = new HashMap();
         K key;
         V value;
 
