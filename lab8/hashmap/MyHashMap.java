@@ -11,7 +11,7 @@ import java.util.*;
  *
  * @author fuzaiyo
  */
-public class MyHashMap<K extends Comparable<K>, V> implements Map61B<K, V> {
+public class MyHashMap<K, V> implements Map61B<K, V> {
 
     /**
      * Protected helper class to store key/value pairs
